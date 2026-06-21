@@ -63,3 +63,6 @@ dist/
 # Misc
 *.bak
 *.swp
+# Large trained models
+artifacts/best_model.pkl
+models/tuned_model.pkl
