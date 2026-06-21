@@ -11,7 +11,7 @@ from config import (
     DATA_RAW_DIR,
 )
 from utils.data_loader import load_dataset, profile_dataset
-from utils.ui_theme import inject_css, sidebar_logo, sidebar_footer
+from utils.ui_theme import inject_css, theme_toggle, sidebar_logo, sidebar_footer
 
 PAGE_REGISTRY = {
     "Dataset Explorer":    "pages.Dataset_Explorer",
@@ -42,14 +42,26 @@ _PAGE_ICONS = {
 
 
 def _load_module(module_path: str):
-    if module_path in sys.modules:
-        return importlib.reload(sys.modules[module_path])
-    return importlib.import_module(module_path)
+    module = sys.modules.get(module_path)
+    if module is None:
+        return importlib.import_module(module_path)
+
+    try:
+        return importlib.reload(module)
+    except Exception:
+        # If the module failed to load previously or its state is stale,
+        # remove it and import cleanly.
+        sys.modules.pop(module_path, None)
+        return importlib.import_module(module_path)
 
 
 def _reload_if_loaded(module_path: str):
-    if module_path in sys.modules:
-        importlib.reload(sys.modules[module_path])
+    module = sys.modules.get(module_path)
+    if module is not None:
+        try:
+            importlib.reload(module)
+        except Exception:
+            sys.modules.pop(module_path, None)
 
 
 def _load_uploaded_data(uploaded_file):
@@ -91,12 +103,32 @@ def main() -> None:
     )
 
     # ── Default UI state ──────────────────────────────────────────────────────
+    if "theme" not in st.session_state:
+        st.session_state["theme"] = "dark"
+    if "nav_open" not in st.session_state:
+        st.session_state["nav_open"] = True
     if "main_nav" not in st.session_state:
         st.session_state["main_nav"] = "Dataset Explorer"
 
     # ── Inject premium CSS ────────────────────────────────────────────────────
     inject_css()
-
+    # ── Hidden sidebar support for the hamburger toggle ───────────────────────
+    if not st.session_state["nav_open"]:
+        st.markdown(
+            """<style>
+            [data-testid='stSidebar'] {
+              width: 0 !important;
+              min-width: 0 !important;
+              max-width: 0 !important;
+              opacity: 0 !important;
+              pointer-events: none !important;
+            }
+            [data-testid='stSidebar'] > div {
+              display: none !important;
+            }
+            </style>""",
+            unsafe_allow_html=True,
+        )
     # ── Sidebar ───────────────────────────────────────────────────────────────
     sidebar = st.sidebar
     sidebar_logo()
@@ -115,6 +147,9 @@ def main() -> None:
             if sidebar.button(label, key=f"nav_{page}", use_container_width=True):
                 st.session_state["main_nav"] = page
                 page_name = page
+
+    # Theme toggle
+    theme_toggle(sidebar)
 
     # Data source section
     sidebar.markdown(
