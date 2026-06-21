@@ -1,0 +1,65 @@
+# ==========================
+# Python
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit Cache
+.streamlit/cache/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporary Files
+tmp_annotated_test.png
+*.tmp
+*.temp
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Python Cache
+.mypy_cache/
+.ruff_cache/
+
+# Environment Variables
+.env
+.env.*
+
+# Large model checkpoints (uncomment if you DON'T want to upload them)
+# *.h5
+# *.pt
+# *.pth
+# *.onnx
+
+# MediaPipe cache
+*.tflite.cache
+
+# Misc
+*.bak
+*.swp

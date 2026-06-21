@@ -1,0 +1,13 @@
+{
+  "best_model": "Random Forest",
+  "cv_score": 0.9387,
+  "metric": "ROC AUC",
+  "target_col": "target",
+  "problem_type": "binary_classification",
+  "feature_count": 13,
+  "n_train": 196,
+  "n_test": 121,
+  "n_features": 13,
+  "smote_applied": true,
+  "test_size": 0.4
+}
