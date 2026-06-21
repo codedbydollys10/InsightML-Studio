@@ -141,10 +141,7 @@ def render(df: pd.DataFrame, profile) -> None:
             proba = model.predict_proba(sample_X)
             sample_df["Probability"] = proba[:, 1] if proba.shape[1] == 2 else proba.max(axis=1)
 
-        def color_correct(val):
-            return "color: #10B981" if val else "color: #EF4444"
+        if "Probability" in sample_df.columns:
+            sample_df["Probability"] = sample_df["Probability"].apply(lambda x: f"{x:.4f}")
 
-        st.dataframe(
-            sample_df.style.applymap(color_correct, subset=["Correct"]).format({"Probability": "{:.4f}"}),
-            use_container_width=True,
-        )
+        st.dataframe(sample_df, use_container_width=True)

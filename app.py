@@ -11,7 +11,7 @@ from config import (
     DATA_RAW_DIR,
 )
 from utils.data_loader import load_dataset, profile_dataset
-from utils.ui_theme import inject_css, theme_toggle, sidebar_logo, sidebar_footer
+from utils.ui_theme import inject_css, sidebar_logo, sidebar_footer
 
 PAGE_REGISTRY = {
     "Dataset Explorer":    "pages.Dataset_Explorer",
@@ -91,8 +91,6 @@ def main() -> None:
     )
 
     # ── Default UI state ──────────────────────────────────────────────────────
-    if "theme" not in st.session_state:
-        st.session_state["theme"] = "dark"
     if "main_nav" not in st.session_state:
         st.session_state["main_nav"] = "Dataset Explorer"
 
@@ -117,9 +115,6 @@ def main() -> None:
             if sidebar.button(label, key=f"nav_{page}", use_container_width=True):
                 st.session_state["main_nav"] = page
                 page_name = page
-
-    # Theme toggle
-    theme_toggle(sidebar)
 
     # Data source section
     sidebar.markdown(

@@ -1137,19 +1137,6 @@ code {
 </style>
 """
 
-# Light mode CSS variable overrides injected via a tiny JS snippet
-_LIGHT_MODE_JS = """
-<script>
-(function() {
-  const isDark = localStorage.getItem('insightml_theme') !== 'light';
-  if (!isDark) {
-    document.documentElement.setAttribute('data-theme', 'light');
-  }
-})();
-</script>
-"""
-
-
 def inject_css() -> None:
     """Inject master CSS + light/dark mode into the current page.
     Call this at the very top of every page's render() function.
