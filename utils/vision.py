@@ -4,7 +4,6 @@ from typing import Any
 
 from PIL import Image
 
-from utils.human_analysis import analyze_humans
 from utils.object_detection import detect_objects
 from utils.scene_analysis import classify_scene
 from utils.image_analysis import analyze_image
@@ -44,6 +43,12 @@ def run_analysis(
     results: dict = {}
 
     if run_human and human_options:
+        try:
+            from utils.human_analysis import analyze_humans
+        except ImportError as exc:
+            raise ImportError(
+                "MediaPipe dependency not available. Install 'mediapipe' and restart the app."
+            ) from exc
         results["human_analysis"] = analyze_humans(image, human_options)
 
     if run_objects and object_categories:
