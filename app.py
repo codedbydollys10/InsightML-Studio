@@ -6,6 +6,10 @@ import importlib
 import sys
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from config import (
     APP_TITLE, APP_ICON, APP_VERSION, TAGLINE,
     DATA_RAW_DIR,
@@ -43,16 +47,28 @@ _PAGE_ICONS = {
 
 def _load_module(module_path: str):
     module = sys.modules.get(module_path)
-    if module is None:
-        return importlib.import_module(module_path)
+    if module is not None:
+        try:
+            module = importlib.reload(module)
+        except Exception:
+            # If the module failed to load previously or its state is stale,
+            # remove it and import cleanly.
+            sys.modules.pop(module_path, None)
+            module = importlib.import_module(module_path)
+    else:
+        module = importlib.import_module(module_path)
 
-    try:
-        return importlib.reload(module)
-    except Exception:
-        # If the module failed to load previously or its state is stale,
-        # remove it and import cleanly.
+    if not hasattr(module, "render"):
+        # Re-import the module to avoid stale partial imports.
         sys.modules.pop(module_path, None)
-        return importlib.import_module(module_path)
+        module = importlib.import_module(module_path)
+        if not hasattr(module, "render"):
+            raise AttributeError(
+                f"Page module {module_path!r} loaded from {getattr(module, '__file__', '<unknown>')} "
+                "does not define a callable render()."
+            )
+
+    return module
 
 
 def _reload_if_loaded(module_path: str):
