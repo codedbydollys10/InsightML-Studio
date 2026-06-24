@@ -18,11 +18,12 @@ import pandas as pd
 import streamlit as st
 from pathlib import Path
 from PIL import Image
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
-from utils.vision import run_analysis
-from utils.vision_report import generate_pdf_report, generate_json_report
+
+def _load_analysis_dependencies():
+    from utils.vision import run_analysis
+    from utils.vision_report import generate_pdf_report, generate_json_report
+    return run_analysis, generate_pdf_report, generate_json_report
 
 
 def _is_image_filename(filename: str) -> bool:
@@ -263,6 +264,7 @@ def _run_batch_analysis(
     run_scene: bool,
     scene_categories: list,
     run_image_analysis: bool,
+    run_analysis: Any,
     progress: Any,
     status: Any,
 ) -> dict:
@@ -761,6 +763,7 @@ def render():
         progress_text = st.empty()
 
         if batch_mode:
+            run_analysis, generate_pdf_report, generate_json_report = _load_analysis_dependencies()
             batch_result = _run_batch_analysis(
                 batch_uploads,
                 enable_human,
@@ -771,6 +774,7 @@ def render():
                 enable_scene,
                 scene_categories,
                 enable_quality,
+                run_analysis,
                 progress_bar,
                 progress_text,
             )
@@ -818,17 +822,23 @@ def render():
                         st.markdown(f"**Quality:** {qa.get('quality', {}).get('label', '—')} | Brightness {qa.get('brightness', '—')} | Contrast {qa.get('contrast', '—')}")
 
         else:
-            results = run_analysis(
-                image=image,
-                run_human=enable_human,
-                human_options=human_options,
-                run_objects=enable_objects,
-                object_categories=object_categories,
-                object_threshold=object_threshold,
-                run_scene=enable_scene,
-                scene_categories=scene_categories,
-                run_image_analysis=enable_quality,
-            )
+            run_analysis, generate_pdf_report, generate_json_report = _load_analysis_dependencies()
+            try:
+                with st.spinner("Running vision analysis. This may take a moment on first load."):
+                    results = run_analysis(
+                        image=image,
+                        run_human=enable_human,
+                        human_options=human_options,
+                        run_objects=enable_objects,
+                        object_categories=object_categories,
+                        object_threshold=object_threshold,
+                        run_scene=enable_scene,
+                        scene_categories=scene_categories,
+                        run_image_analysis=enable_quality,
+                    )
+            except Exception as exc:
+                st.error(f"Vision analysis could not be completed: {exc}")
+                st.stop()
             annotated = _select_annotated_image(results)
             st.success("Image analysis complete.")
             result_cols = st.columns([1, 1])
