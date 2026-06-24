@@ -11,6 +11,12 @@
 
 ---
 
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
 ## 🌟 Overview
 
 InsightML Studio is an all-in-one Machine Learning and Computer Vision platform built with Python, Streamlit, Scikit-Learn, OpenCV, and MediaPipe.
