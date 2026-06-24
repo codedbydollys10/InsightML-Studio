@@ -4,9 +4,17 @@ from typing import Any
 
 from PIL import Image
 
-from utils.object_detection import detect_objects
-from utils.scene_analysis import classify_scene
-from utils.image_analysis import analyze_image
+
+def _load_analysis_backend_modules():
+    try:
+        from utils.object_detection import detect_objects
+        from utils.scene_analysis import classify_scene
+        from utils.image_analysis import analyze_image
+    except Exception as exc:
+        raise ImportError(
+            "Vision AI dependencies could not be loaded. Ensure torch, torchvision, and OpenCV are installed."
+        ) from exc
+    return detect_objects, classify_scene, analyze_image
 
 
 def run_analysis(
@@ -41,6 +49,7 @@ def run_analysis(
     """
     t_total = time.perf_counter()
     results: dict = {}
+    detect_objects, classify_scene, analyze_image = _load_analysis_backend_modules()
 
     if run_human and human_options:
         try:
