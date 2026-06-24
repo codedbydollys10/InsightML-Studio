@@ -5,6 +5,15 @@ from typing import Any
 from PIL import Image
 
 
+def _prepare_image_for_analysis(image: Image.Image, max_side: int = 640) -> Image.Image:
+    width, height = image.size
+    if max(width, height) <= max_side:
+        return image
+    scale = max_side / max(width, height)
+    new_size = (max(1, int(width * scale)), max(1, int(height * scale)))
+    return image.resize(new_size, Image.Resampling.LANCZOS)
+
+
 def _load_analysis_backend_modules():
     try:
         from utils.object_detection import detect_objects
@@ -49,6 +58,7 @@ def run_analysis(
     """
     t_total = time.perf_counter()
     results: dict = {}
+    image_for_analysis = _prepare_image_for_analysis(image)
     detect_objects, classify_scene, analyze_image = _load_analysis_backend_modules()
 
     if run_human and human_options:
@@ -58,18 +68,18 @@ def run_analysis(
             raise ImportError(
                 "MediaPipe dependency not available. Install 'mediapipe' and restart the app."
             ) from exc
-        results["human_analysis"] = analyze_humans(image, human_options)
+        results["human_analysis"] = analyze_humans(image_for_analysis, human_options)
 
     if run_objects and object_categories:
         results["object_detection"] = detect_objects(
-            image, object_categories, object_threshold
+            image_for_analysis, object_categories, object_threshold
         )
 
     if run_scene and scene_categories:
-        results["scene_analysis"] = classify_scene(image, scene_categories)
+        results["scene_analysis"] = classify_scene(image_for_analysis, scene_categories)
 
     if run_image_analysis:
-        results["image_analysis"] = analyze_image(image)
+        results["image_analysis"] = analyze_image(image_for_analysis)
 
     results["total_time_ms"] = round((time.perf_counter() - t_total) * 1000, 1)
     return results
