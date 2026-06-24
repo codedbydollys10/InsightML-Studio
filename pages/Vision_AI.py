@@ -562,6 +562,9 @@ def render():
 
         st.markdown(f"<div class=\"vai-card\"><div class=\"vai-card-title\">📦 Dataset Loaded</div>\n" \
                     f"<div class=\"det-card-desc\">Found {len(batch_uploads)} image(s) inside the ZIP archive.</div></div>", unsafe_allow_html=True)
+        if len(batch_uploads) > 8:
+            st.warning("⚡ Large ZIP files are preview-limited in deployment to avoid long waits. Only the first 8 images will be analyzed unless you switch to a smaller archive.")
+            batch_uploads = batch_uploads[:8]
         first_item = batch_uploads[0]
         image = first_item["image"]
         width, height = image.size
@@ -627,7 +630,7 @@ def render():
     # ─────────────────────────────────────────────────────────────────────────────
     # Module 1 — Human Analysis
     # ─────────────────────────────────────────────────────────────────────────────
-    with st.expander("👤 Module 1 · Human Analysis", expanded=True):
+    with st.expander("👤 Module 1 · Human Analysis", expanded=False):
         st.markdown("""
         <div class="det-card-desc">
         Detect human features using MediaPipe. Select the body parts and features to analyze.
@@ -675,7 +678,7 @@ def render():
     # ─────────────────────────────────────────────────────────────────────────────
     # Module 2 — Object Detection
     # ─────────────────────────────────────────────────────────────────────────────
-    with st.expander("📦 Module 2 · Object Detection", expanded=True):
+    with st.expander("📦 Module 2 · Object Detection", expanded=False):
         st.markdown("""
         <div class="det-card-desc">
         Detect objects using Faster R-CNN (MobileNetV3 backbone, COCO-trained). 
@@ -753,7 +756,7 @@ def render():
         Analyze brightness, contrast, sharpness and blur for every uploaded image.
         </div>
         """, unsafe_allow_html=True)
-        enable_quality = st.checkbox("Enable Image Quality Analysis", value=False, key="enable_quality")
+        enable_quality = st.checkbox("Enable Image Quality Analysis", value=True, key="enable_quality")
 
     st.markdown('<hr class="section-hr">', unsafe_allow_html=True)
 
@@ -824,7 +827,7 @@ def render():
         else:
             run_analysis, generate_pdf_report, generate_json_report = _load_analysis_dependencies()
             try:
-                with st.spinner("Running vision analysis. This may take a moment on first load."):
+                with st.spinner("Running lightweight preview. Heavy vision modules stay off unless you enable them."):
                     results = run_analysis(
                         image=image,
                         run_human=enable_human,
