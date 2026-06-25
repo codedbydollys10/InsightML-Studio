@@ -193,7 +193,7 @@ def main() -> None:
         module.render()
         return
 
-    # ── Dataset management ────────────────────────────────────────────────────
+
     if "data_frame" not in st.session_state:
         df, source = _load_data(uploaded_file)
         st.session_state["data_frame"] = df
