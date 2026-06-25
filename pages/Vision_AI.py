@@ -64,6 +64,11 @@ def _extract_images_from_zip(uploaded_zip) -> list[dict]:
     return images
 
 
+def _prepare_batch_uploads(batch_uploads: list[dict]) -> list[dict]:
+    """Return all batch uploads without truncating large archives."""
+    return batch_uploads
+
+
 def _generate_dataset_json_report(summary: dict, image_summaries: list[dict], input_filename: str) -> str:
     def _serialize(value):
         if isinstance(value, Counter):
@@ -562,9 +567,7 @@ def render():
 
         st.markdown(f"<div class=\"vai-card\"><div class=\"vai-card-title\">📦 Dataset Loaded</div>\n" \
                     f"<div class=\"det-card-desc\">Found {len(batch_uploads)} image(s) inside the ZIP archive.</div></div>", unsafe_allow_html=True)
-        if len(batch_uploads) > 8:
-            st.warning("⚡ Large ZIP files are preview-limited in deployment to avoid long waits. Only the first 8 images will be analyzed unless you switch to a smaller archive.")
-            batch_uploads = batch_uploads[:8]
+        batch_uploads = _prepare_batch_uploads(batch_uploads)
         first_item = batch_uploads[0]
         image = first_item["image"]
         width, height = image.size

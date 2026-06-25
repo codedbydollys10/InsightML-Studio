@@ -16,6 +16,17 @@ class VisionImportTests(unittest.TestCase):
         self.assertNotIn("utils.scene_analysis", sys.modules)
         self.assertTrue(hasattr(module, "render"))
 
+    def test_prepare_batch_uploads_keeps_all_images_for_large_zips(self):
+        module = importlib.import_module("pages.Vision_AI")
+        batch_uploads = [{"filename": f"img{i}.jpg"} for i in range(12)]
+
+        prepared_uploads = module._prepare_batch_uploads(batch_uploads)
+
+        self.assertEqual(len(prepared_uploads), 12)
+        self.assertEqual(prepared_uploads[0]["filename"], "img0.jpg")
+        self.assertEqual(prepared_uploads[-1]["filename"], "img11.jpg")
+
+
 
 if __name__ == "__main__":
     unittest.main()
