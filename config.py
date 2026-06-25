@@ -8,7 +8,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-# ── Paths ──────────────────────────────────────────────────────────────────
 ROOT_DIR       = Path(__file__).parent
 DATA_RAW_DIR   = ROOT_DIR / "data" / "raw"
 DATA_PROC_DIR  = ROOT_DIR / "data" / "processed"
